@@ -1,0 +1,30 @@
+name: Build and push Docker images to DockerHub
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - name: Set up JDK
+      uses: actions/setup-java@v1
+      with:
+        java-version: 11
+    - name: Maven Package
+      run: mvn -B clean package
+#    - name: Get release version
+#      id: get_version
+#      run: echo ::set-env name=RELEASE_VERSION::`date +%F-%I-%M`
+    - name: Publish to Registry
+      uses: elgohr/Publish-Docker-Github-Action@master
+      with:
+        name: rassidm/k8s-demo-app
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+        tags: "latest"
+        buildoptions: "--compress --force-rm"
